@@ -18,6 +18,7 @@ config = configparser.ConfigParser()
 config.read(config_path)
 
 duration = int(config.get('TIME','duration'))
+duration = duration * 3600
 
 while True:
     fetch_signedcer()
