@@ -1,0 +1,11 @@
+Source: certificate-controller
+Section: devel
+Priority: optional
+Maintainer: Ali Rıza Girişen <ali.girisen@pardus.org.tr>
+Build-Depends: debhelper (>= 10)
+
+Package: certificate-controller
+Architecture: any
+Depends: python3
+Description: Certificate controller
+postinst: debian/postinst

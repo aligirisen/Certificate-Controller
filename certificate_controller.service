@@ -1,0 +1,9 @@
+[Unit]
+Description=Controller of Certificates
+
+[Service]
+ExecStart=/bin/bash -c 'usr/bin/python3 /usr/bin/certificate_controller/service.py'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

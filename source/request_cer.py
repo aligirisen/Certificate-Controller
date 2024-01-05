@@ -1,33 +1,43 @@
-import requests
+'''
+Author: Ali Rıza Girişen 
+Date: 04/01/2024 
+Email: <ali.girisen@pardus.org.tr>
+'''
+import requests,os,configparser
 from requests_kerberos import HTTPKerberosAuth
 
-# Replace these with your actual values
-kerberos_principal = "user1@ORNEK.LOCAL"
-kerberos_keytab = "/etc/krb5.keytab"
-ca_cert_path = "/etc/ssl/certs/ca-certificates.crt"
-csr_file_path = "csr.csr"
-template_name = "User"
-certsrv_url = "http://win-l9up83kacsi.ornek.local/certsrv/certfnsh.asp"
+def request_cer():
+    config_path = "/etc/certificate_controller/config.ini"
+    if os.path.exists(config_path):
+        pass
+    else:
+        config_path = "config/config.ini"
 
-# Read the CSR file content
-with open(csr_file_path, "r") as csr_file:
-    csr_content = csr_file.read()
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    kerberos_principal = config.get('KRB','kerberos_principal')
+    kerberos_keytab = config.get('KRB','kerberos_keytab')
+    ca_cert_path = config.get('KRB','ca_cert_path')
+    csr_file_path = config.get('KRB','csr_file_path')
+    template_name = config.get('KRB','template_name')
+    certsrv_url = config.get('KRB','certsrv_url')
 
-# Kerberos authentication using keytab
-kerberos_auth = HTTPKerberosAuth(principal=kerberos_principal, sanitize_mutual_error_response=False, force_preemptive=True)
+    with open(csr_file_path, "r") as csr_file:
+        csr_content = csr_file.read()
 
-# Data to be sent in the request
-data = {
-    "Mode": "newreq",
-    "CertRequest": csr_content,
-    "CertAttrib": f"CertificateTemplate:{template_name}",
-}
+    # Kerberos authentication using keytab
+    kerberos_auth = HTTPKerberosAuth(principal=kerberos_principal, sanitize_mutual_error_response=False, force_preemptive=True)
 
-# Send the HTTP request
-response = requests.post(
-    certsrv_url,
-    auth=kerberos_auth,
-    verify=ca_cert_path,
-    data=data
-)
-print(response.status_code)
+    data = {
+        "Mode": "newreq",
+        "CertRequest": csr_content,
+        "CertAttrib": f"CertificateTemplate:{template_name}",
+    }
+
+    response = requests.post(
+        certsrv_url,
+        auth=kerberos_auth,
+        verify=ca_cert_path,
+        data=data
+    )
+request_cer()

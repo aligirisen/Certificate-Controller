@@ -1,0 +1,4 @@
+config/* /etc/certificate_controller/
+certificate_controller.service /etc/systemd/system/
+requirements.txt /usr/share/certificate_controller/
+source/* /usr/bin/certificate_controller/
