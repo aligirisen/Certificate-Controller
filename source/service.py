@@ -3,7 +3,7 @@ Author: Ali Rıza Girişen
 Date: 04/01/2024 
 Email: <ali.girisen@pardus.org.tr>
 '''
-import time, configparser
+import time, configparser, os
 from fetch_signedcer import fetch_signedcer
 
 
