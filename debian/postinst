@@ -12,10 +12,6 @@ echo "Installation of python3 libraries"
 echo "pip install -r  /usr/share/certificate_controller/requirements.txt"
 pip install -r  /usr/share/certificate_controller/requirements.txt
 
-
-echo "Creating directory for computer and user certificates"
-mkdir /etc/ssl/certificate-controller/
-
 case "$1" in
 	configure)
 		systemctl enable certificate_controller

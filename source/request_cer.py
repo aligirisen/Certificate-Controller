@@ -25,7 +25,6 @@ def request_cer(sensitive_keys_path,uid,gid):
     config = configparser.ConfigParser()
     config.read(config_path)
     kerberos_principal = config.get('KRB','kerberos_principal')
-    kerberos_keytab = config.get('KRB','kerberos_keytab')
     ca_cert_path = config.get('KRB','ca_cert_path')
     template_name = config.get('KRB','template_name')
     certsrv_url = config.get('KRB','certsrv_url')
@@ -114,4 +113,3 @@ def generate_csr(user_to_query, private_key, file_path):
     print(f"CSR written to: {file_path}")
     return csr
 
-request_cer()

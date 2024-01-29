@@ -26,14 +26,18 @@ def fetch_signedcer():
     user_to_query = config.get('KRB','entry_to_query')
     renew_before = int(config.get('TIME','renew_before'))
     username = os.getlogin()
+    username = os.environ.get('SUDO_USER')
     sensitive_keys_path = "" # depended user or machine account
 
     #client ca
     ca_path = '/usr/local/share/ca-certificates/DOMAIN-SERVER-CERTIFICATE.crt'  
     installed_cert_path = '/etc/ssl/certs/DOMAIN-SERVER-CERTIFICATE.pem'
 
+    print(username)
     uid = pwd.getpwnam(username).pw_uid
+    print(uid)
     gid = pwd.getpwnam(username).pw_gid
+    print(gid)
 
     directories = ["/etc/ssl/.certificate_controller",f"/home/{username}/.certificate_controller"]
     for directory in directories:
@@ -73,16 +77,21 @@ def fetch_signedcer():
                 current_date = datetime.now()
                 days_remaining = (cert.not_valid_after - current_date).days
 
+                pem_file_path = f"{sensitive_keys_path}{user_to_query}.pem"
+                print("Checking...")
+
                 if days_remaining <= renew_before:
-                    request_cer(sensitive_keys_path)
+                    if os.path.exists(pem_file_path):
+                        os.remove(pem_file_path)
+                    request_cer(sensitive_keys_path,uid,gid)
                 else:
-                    pem_file_path = f"{sensitive_keys}{user_to_query}.pem"
-                    with open(pem_file_path, "wb") as pem_file:
-                        pem_file.write(cert.public_bytes(encoding=cryptography.hazmat.primitives.serialization.Encoding.PEM))
-                    os.chown(pem_file_path, uid, gid)
-                    os.chmod(pem_file_path, permissions)
-                    print(f"Certificate Expiration Time: {expiration_time}")
-                    print(f"Certificate saved as PEM: {pem_file_path}")
+                    if not os.path.exists(pem_file_path):
+                        with open(pem_file_path, "wb") as pem_file:
+                            pem_file.write(cert.public_bytes(encoding=cryptography.hazmat.primitives.serialization.Encoding.PEM))
+                        os.chown(pem_file_path, uid, gid)
+                        os.chmod(pem_file_path, permissions)
+                        print(f"Certificate Expiration Time: {expiration_time}")
+                        print(f"Certificate saved as PEM: {pem_file_path}")
                 break
         else:
             request_cer(sensitive_keys_path,uid,gid)
