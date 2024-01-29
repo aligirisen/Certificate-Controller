@@ -33,11 +33,8 @@ def fetch_signedcer():
     ca_path = '/usr/local/share/ca-certificates/DOMAIN-SERVER-CERTIFICATE.crt'  
     installed_cert_path = '/etc/ssl/certs/DOMAIN-SERVER-CERTIFICATE.pem'
 
-    print(username)
     uid = pwd.getpwnam(username).pw_uid
-    print(uid)
     gid = pwd.getpwnam(username).pw_gid
-    print(gid)
 
     directories = ["/etc/ssl/.certificate_controller",f"/home/{username}/.certificate_controller"]
     for directory in directories:
