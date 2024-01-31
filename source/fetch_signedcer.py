@@ -11,8 +11,7 @@ from datetime import datetime
 from request_cer import request_cer
 from update_client_ca import update_client_ca
 
-
-def fetch_signedcer():
+def fetch_signedcer(username):
     config_path = "/etc/certificate_controller/config.ini"
     if os.path.exists(config_path):
         pass
@@ -23,10 +22,7 @@ def fetch_signedcer():
     config.read(config_path)
     ad_server = config.get('AD','ad_server')
     base_dn = config.get('AD','base_dn')
-    user_to_query = config.get('KRB','entry_to_query')
     renew_before = int(config.get('TIME','renew_before'))
-    username = os.getlogin()
-    username = os.environ.get('SUDO_USER')
     sensitive_keys_path = "" # depended user or machine account
 
     #client ca
@@ -46,7 +42,7 @@ def fetch_signedcer():
             update_client_ca(ad_server, ca_path)
     
 
-    if "$" not in user_to_query:# $ MEANS USER IS NOT MACHINE ACCOUNT
+    if "$" not in username:# $ MEANS USER IS NOT MACHINE ACCOUNT
         uid = pwd.getpwnam(username).pw_uid
         ticket_cache = f'/tmp/krb5cc_{uid}'
         os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
@@ -61,7 +57,7 @@ def fetch_signedcer():
     server = Server(ad_server, get_info=ALL_ATTRIBUTES)
     connection = Connection(server, authentication='SASL',sasl_mechanism='GSSAPI', auto_bind=True, receive_timeout=30, auto_referrals=False, raise_exceptions=True)
 
-    search_filter = f'(sAMAccountName={user_to_query})'
+    search_filter = f'(sAMAccountName={username})'
     connection.search(base_dn, search_filter, SUBTREE, attributes=['userCertificate'])
 
     # Parse and save the certificate as PEM file
@@ -74,13 +70,13 @@ def fetch_signedcer():
                 current_date = datetime.now()
                 days_remaining = (cert.not_valid_after - current_date).days
 
-                pem_file_path = f"{sensitive_keys_path}{user_to_query}.pem"
+                pem_file_path = f"{sensitive_keys_path}{username}.pem"
                 print("Checking...")
 
                 if days_remaining <= renew_before:
                     if os.path.exists(pem_file_path):
                         os.remove(pem_file_path)
-                    request_cer(sensitive_keys_path,uid,gid)
+                    request_cer(username,sensitive_keys_path,uid,gid)
                 else:
                     if not os.path.exists(pem_file_path):
                         with open(pem_file_path, "wb") as pem_file:
@@ -91,6 +87,6 @@ def fetch_signedcer():
                         print(f"Certificate saved as PEM: {pem_file_path}")
                 break
         else:
-            request_cer(sensitive_keys_path,uid,gid)
+            request_cer(username,sensitive_keys_path,uid,gid)
 
     connection.unbind()

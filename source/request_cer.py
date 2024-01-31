@@ -14,7 +14,7 @@ from cryptography import x509
 import base64
 from cryptography.x509.oid import NameOID
 
-def request_cer(sensitive_keys_path,uid,gid):
+def request_cer(username,sensitive_keys_path,uid,gid):
     config_path = "/etc/certificate_controller/config.ini"
     if os.path.exists(config_path):
         pass
@@ -28,9 +28,7 @@ def request_cer(sensitive_keys_path,uid,gid):
     ca_cert_path = config.get('KRB','ca_cert_path')
     template_name = config.get('KRB','template_name')
     certsrv_url = config.get('KRB','certsrv_url')
-    sensitive_keys_path, private_key_path, csr_path, csr_content = "","","", ""
-    user_to_query = config.get('KRB','entry_to_query')
-    username = os.getlogin()
+    private_key_path, csr_path, csr_content = "","",""
 
     private_key_path = f'{sensitive_keys_path}private_key.pem'
     csr_path = f'{sensitive_keys_path}csr.csr'
@@ -39,14 +37,14 @@ def request_cer(sensitive_keys_path,uid,gid):
         with open(csr_path, "r") as csr_file:
             csr_content = csr_file.read()
     else:
-        private_key = generate_private_key_pem(private_key_path)
-        generate_csr(user_to_query, private_key, csr_path)
+        private_key = generate_private_key_pem(private_key_path,uid,gid)
+        generate_csr(username, private_key, csr_path)
 
     # Kerberos authentication using keytab
     kerberos_auth = HTTPKerberosAuth(
             principal=kerberos_principal,
             sanitize_mutual_error_response=False,
-            force_preemptive=True,
+            force_preemptive=True
             )
 
     data = {
@@ -65,7 +63,7 @@ def request_cer(sensitive_keys_path,uid,gid):
 
     os.remove(csr_path)
 
-def generate_private_key_pem(file_path):
+def generate_private_key_pem(file_path,uid,gid):
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
@@ -81,19 +79,14 @@ def generate_private_key_pem(file_path):
 
     with open(file_path, 'wb') as private_key_file:
         private_key_file.write(private_key_pem)
-    if uid==0:
-        os.chown(file_path, uid, gid)
-        permissions = 0o400
-        os.chmod(file_path, permissions)
-    else:
-        os.chown(file_path, uid, gid)
-        permissions = 0o400
-        os.chmod(file_path, permissions)
+    os.chown(file_path, uid, gid)
+    permissions = 0o400
+    os.chmod(file_path, permissions)
 
     print(f"Private key written to: {file_path}")
     return private_key
 
-def generate_csr(user_to_query, private_key, file_path):
+def generate_csr(username, private_key, file_path):
     csr = x509.CertificateSigningRequestBuilder().subject_name(
         x509.Name([
             x509.NameAttribute(NameOID.COUNTRY_NAME, "TR"),
@@ -101,7 +94,7 @@ def generate_csr(user_to_query, private_key, file_path):
             x509.NameAttribute(NameOID.LOCALITY_NAME, ""),
             x509.NameAttribute(NameOID.ORGANIZATION_NAME, ""),
             x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, ""),
-            x509.NameAttribute(NameOID.COMMON_NAME, user_to_query),
+            x509.NameAttribute(NameOID.COMMON_NAME, username),
         ])
     ).sign(private_key, hashes.SHA256(), default_backend())
 
@@ -112,4 +105,3 @@ def generate_csr(user_to_query, private_key, file_path):
 
     print(f"CSR written to: {file_path}")
     return csr
-
