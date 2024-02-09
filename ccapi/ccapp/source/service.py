@@ -6,8 +6,16 @@ Email: <ali.girisen@pardus.org.tr>
 import time, configparser, os, re
 from django.core.signals import request_started
 from django.dispatch import receiver
-from fetch_signedcer import fetch_signedcer
+from .fetch_signedcer import fetch_signedcer
 import psutil, socket
+
+
+
+#lokal kullanıcılar
+#def get_all_users(usernames):
+  #  for user in psutil.users():
+ #       usernames.append(user.name)
+#    return usernames
 
 
 def login(username):

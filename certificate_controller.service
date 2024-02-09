@@ -2,8 +2,7 @@
 Description=Controller of Certificates
 
 [Service]
-User=$USER
-ExecStart=/bin/bash -c 'usr/bin/python3 /usr/bin/certificate_controller/service.py'
+ExecStart=/bin/bash -c ''usr/bin/python3 /usr/bin/certificate_controller/service.py'
 Restart=always
 
 [Install]

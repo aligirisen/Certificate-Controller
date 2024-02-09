@@ -9,8 +9,8 @@ from cryptography.x509 import load_der_x509_certificate
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from datetime import datetime
-from request_cer import request_cer
-from update_client_ca import update_client_ca
+from .request_cer import request_cer
+from .update_client_ca import update_client_ca
 
 def fetch_signedcer(username):
     config_path = "/etc/certificate_controller/config.ini"

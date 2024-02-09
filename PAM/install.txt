@@ -1,0 +1,4 @@
+- copy pam_login.so to following directory /lib/x86_64-linux-gnu/security/
+
+- navigate /etc/pam.d/common-session then add following line 
+session optional			pam_login.so
