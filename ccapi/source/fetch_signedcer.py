@@ -9,8 +9,8 @@ from cryptography.x509 import load_der_x509_certificate
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from datetime import datetime
-from request_cer import request_cer
-from update_client_ca import update_client_ca
+from .request_cer import request_cer
+from .update_client_ca import update_client_ca
 
 def fetch_signedcer(username):
     config_path = "/etc/certificate_controller/config.ini"
@@ -30,8 +30,6 @@ def fetch_signedcer(username):
     ca_path = '/usr/local/share/ca-certificates/DOMAIN-SERVER-CERTIFICATE.crt'  
     installed_cert_path = '/etc/ssl/certs/DOMAIN-SERVER-CERTIFICATE.pem'
 
-    uid = pwd.getpwnam(username).pw_uid
-    gid = pwd.getpwnam(username).pw_gid
 
     directories = ["/etc/ssl/.certificate_controller",f"/home/{username}/.certificate_controller"]
     for directory in directories:
@@ -45,6 +43,7 @@ def fetch_signedcer(username):
 
     if "$" not in username:# $ MEANS USER IS NOT MACHINE ACCOUNT
         uid = pwd.getpwnam(username).pw_uid
+        gid = pwd.getpwnam(username).pw_gid
         ticket_cache = f'/tmp/krb5cc_{uid}'
         if not os.path.exists(ticket_cache):
             return False
@@ -52,6 +51,7 @@ def fetch_signedcer(username):
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
         permissions = 0o444
     else:#root computer acc
+        hostname = f"{(socket.gethostname()).upper()}$"
         uid = 0
         gid = 0
         sensitive_keys_path = f"/etc/ssl/.certificate_controller/"

@@ -48,12 +48,14 @@ void request_login(char *username){
 	snprintf(json_data, json_length, "{\"username\":\"%s\"}", username);
 
 	printf("%s\n",json_data);
-	free(json_data);
+
         
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data);
 
         // Perform the request
         res = curl_easy_perform(curl);
+	
+	free(json_data);
 
         // Check for errors
         if(res != CURLE_OK)

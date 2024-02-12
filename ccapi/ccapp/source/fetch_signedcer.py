@@ -47,6 +47,7 @@ def fetch_signedcer(username):
         uid = pwd.getpwnam(username).pw_uid
         ticket_cache = f'/tmp/krb5cc_{uid}'
         if not os.path.exists(ticket_cache):
+            print(f"Ticket not found for {username}")
             return False
         os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
