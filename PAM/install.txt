@@ -1,3 +1,6 @@
+- compile .so file with following command.
+'''gcc -fPIC -shared -o pam_login.so pam_login.c -lpam -lcurl'''
+
 - copy pam_login.so to following directory /lib/x86_64-linux-gnu/security/
 
 - navigate /etc/pam.d/common-session then add following line 

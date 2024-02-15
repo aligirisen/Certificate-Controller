@@ -30,32 +30,29 @@ def fetch_signedcer(username):
     ca_path = '/usr/local/share/ca-certificates/DOMAIN-SERVER-CERTIFICATE.crt'  
     installed_cert_path = '/etc/ssl/certs/DOMAIN-SERVER-CERTIFICATE.pem'
 
-
-    directories = ["/etc/ssl/.certificate_controller",f"/home/{username}/.certificate_controller"]
-    for directory in directories:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-
     if not os.path.exists(installed_cert_path):
             update_client_ca(ad_server, ca_path)
     
-
     if "$" not in username:# $ MEANS USER IS NOT MACHINE ACCOUNT
         uid = pwd.getpwnam(username).pw_uid
         gid = pwd.getpwnam(username).pw_gid
-        ticket_cache = f'/tmp/krb5cc_{uid}'
-        if not os.path.exists(ticket_cache):
+        ticket_cache = f'/tmp/krb5cc_{uid}'#kerberos and home dir are mandatory
+        if not os.path.exists(ticket_cache) or uid < 1000:
             return False
         os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
         permissions = 0o444
+    
+        if not os.path.exists(sensitive_keys_path):
+            os.makedirs(sensitive_keys_path)
+
     else:#root computer acc
-        hostname = f"{(socket.gethostname()).upper()}$"
         uid = 0
         gid = 0
         sensitive_keys_path = f"/etc/ssl/.certificate_controller/"
         permissions = 0o600
+        if not os.path.exists(sensitive_keys_path):
+            os.makedirs(sensitive_keys_path)
 
     pem_file_path = f"{sensitive_keys_path}{username}.pem"
     if not os.path.exists(pem_file_path):

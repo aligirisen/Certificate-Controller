@@ -2,3 +2,8 @@ config/* /etc/certificate_controller/
 certificate_controller.service /etc/systemd/system/
 requirements.txt /usr/share/certificate_controller/
 ccapi/* /usr/bin/certificate_controller/ccapi/
+run.py /usr/bin/certificate_controller/
+source/* /usr/bin/certificate_controller/source
+database/db.sqlite3 /opt/certificate_controller/db/
+PAM/certificate-controller /etc/pam.d/
+PAM/pam_login.so /lib/x86_64-linux-gnu/security/

@@ -1,0 +1,5 @@
+# The PAM configuration file for the certificate controller
+session	[default=1]			pam_permit.so
+# here's the fallback if no module succeeds
+session optional			pam_login.so
+session	requisite			pam_deny.so

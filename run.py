@@ -4,12 +4,13 @@ Date: 04/01/2024
 Email: <ali.girisen@pardus.org.tr>
 '''
 import threading, time
-import time, configparser, os
+import time, configparser, os, sys
 from django.core.signals import request_started
 from django.dispatch import receiver
 from django.core.management import execute_from_command_line
-import socket
+import socket, django
 from source.service import run_period
+sys.path.append('/usr/bin/certificate_controller/ccapi')
 
 def django_thread():
     """Run administrative tasks."""
@@ -23,10 +24,13 @@ def django_thread():
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(['manage.py', 'runserver', '--noreload'])
-def period_thread(duration):
+def period_thread():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ccapi.settings')
+    from ccapp.models import Username
+    usernames = [username.name for username in Username.objects.all()]
+
     while True:
-        time.sleep(15)
-        run_period()
+        run_period(usernames)
         time.sleep(duration)
 
 try:
@@ -38,13 +42,12 @@ try:
     duration = int(config.get('TIME','duration'))
     duration = duration * 3600
 
-    hostname = f"{(socket.gethostname()).upper()}$"
-
     django_thread = threading.Thread(target=django_thread)
     period_thread = threading.Thread(target=period_thread)
 
+    time.sleep(2)
     django_thread.start()
-    time.sleep(5)
+    time.sleep(7)
     period_thread.start()
 
 

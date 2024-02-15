@@ -47,8 +47,6 @@ void request_login(char *username){
 	}
 	snprintf(json_data, json_length, "{\"username\":\"%s\"}", username);
 
-	printf("%s\n",json_data);
-
         
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_data);
 
