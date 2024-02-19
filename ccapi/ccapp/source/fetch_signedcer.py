@@ -52,7 +52,7 @@ def fetch_signedcer(username):
         permissions = 0o444
     
         if not os.path.exists(sensitive_keys_path):
-            os.makedirs(directory)
+            os.makedirs(sensitive_keys_path)
 
     else:#root computer acc
         uid = 0
