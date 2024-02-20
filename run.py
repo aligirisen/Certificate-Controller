@@ -47,7 +47,7 @@ try:
 
     time.sleep(2)
     django_thread.start()
-    time.sleep(7)
+    time.sleep(3)
     period_thread.start()
 
 

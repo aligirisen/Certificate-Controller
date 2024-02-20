@@ -4,7 +4,7 @@ Date: 04/01/2024
 Email: <ali.girisen@pardus.org.tr>
 '''
 from ldap3 import Server, Connection, SUBTREE, ALL_ATTRIBUTES
-import cryptography, os, configparser, pwd
+import cryptography, os, configparser, pwd, time
 from cryptography.x509 import load_der_x509_certificate
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
