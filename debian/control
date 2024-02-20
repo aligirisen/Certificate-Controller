@@ -6,6 +6,6 @@ Build-Depends: debhelper (>= 10)
 
 Package: certificate-controller
 Architecture: any
-Depends: python3
+Depends: python3, krb5-user, krb5-config, libkrb5-dev, 
 Description: Certificate controller
 postinst: debian/postinst

@@ -1,10 +1,5 @@
-Django==4.2.7
-beautifulsoup4==4.12.2
-certifi==2020.6.20
-cryptography==41.0.5
-gssapi==1.8.3
-krb5==0.5.1
-ldap3==2.9.1
-requests==2.25.1
-requests-kerberos==0.14.0
-requests-toolbelt==0.9.1
+django
+gssapi
+psutil
+ldap3
+requests-kerberos
