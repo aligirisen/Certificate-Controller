@@ -48,6 +48,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
         generate_csr(username, private_key, csr_path)
 
     # Kerberos authentication using keytab
+    os.environ['KRB5CCNAME'] = f'/tmp/krb5cc_{uid}'
     kerberos_auth = HTTPKerberosAuth(
             principal=kerberos_principal,
             sanitize_mutual_error_response=False,
