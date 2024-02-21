@@ -2,14 +2,7 @@
 
 set -e
 
-echo "To complete the installation, please run the following commands:"
-echo "sudo apt install pip"
-if ! command -v pip &> /dev/null; then
-	sudo apt-get install -y pip
-fi
-#sudo apt install pip
 echo "Installation of python3 libraries"
-echo "pip install -r  /usr/share/certificate_controller/requirements.txt"
 pip install -r  /usr/share/certificate_controller/requirements.txt
 
 case "$1" in

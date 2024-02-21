@@ -27,7 +27,15 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     ca_cert_path = config.get('KRB','ca_cert_path')
     template_name = config.get('KRB','template_name')
     certsrv_url = config.get('KRB','certsrv_url')
+    
+    server = config.get('AD', 'ad_server')
     private_key_path, csr_path, csr_content = "","",""
+
+    #parse domain from server
+    server = server.upper()
+    domain_parts = server.split('.')
+    domain = '.'.join(domain_parts[-2:])
+    kerberos_principal = f'{username}@{domain}'
 
     private_key_path = f'{sensitive_keys_path}private_key.pem'
     csr_path = f'{sensitive_keys_path}csr.csr'
@@ -41,7 +49,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
 
     # Kerberos authentication using keytab
     kerberos_auth = HTTPKerberosAuth(
-            principal=username,
+            principal=kerberos_principal,
             sanitize_mutual_error_response=False,
             force_preemptive=True
             )

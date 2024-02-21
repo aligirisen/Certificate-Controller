@@ -1,4 +1,5 @@
 django
+cryptography
 gssapi
 psutil
 ldap3
