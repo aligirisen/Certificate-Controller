@@ -8,7 +8,7 @@ import cryptography, os, configparser, pwd, time
 from cryptography.x509 import load_der_x509_certificate
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
-from datetime import datetime
+from datetime import datetime, timezone
 from .request_cer import request_cer
 from .update_client_ca import update_client_ca
 
@@ -79,6 +79,7 @@ def fetch_signedcer(username):
                     expiration_time = cert.not_valid_after
 
                     current_date = datetime.now()
+                    current_date = current_date.replace(tzinfo=timezone.utc)
                     days_remaining = (cert.not_valid_after - current_date).days
 
 
@@ -109,6 +110,7 @@ def fetch_signedcer(username):
         expiration_time = cert.not_valid_after
         
         current_date = datetime.now()
+        current_date = current_date.replace(tzinfo=timezone.utc)
         days_remaining = (expiration_time - current_date).days
         if days_remaining <= renew_before:
             request_cer(username,sensitive_keys_path,uid,gid)

@@ -3,7 +3,7 @@ Author: Ali Rıza Girişen
 Date: 04/01/2024 
 Email: <ali.girisen@pardus.org.tr>
 '''
-import requests,os,configparser
+import requests,os,configparser,time
 from requests_kerberos import HTTPKerberosAuth
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
@@ -69,6 +69,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     )
     print(response.status_code)
 
+    time.sleep(7)
     os.remove(csr_path)
 
 def generate_private_key_pem(file_path,uid,gid):
