@@ -24,7 +24,8 @@ def fetch_signedcer(username):
     ad_server = config.get('AD','ad_server')
     base_dn = config.get('AD','base_dn')
     renew_before = int(config.get('TIME','renew_before'))
-    sensitive_keys_path = "" # depended user or machine account
+    sensitive_keys_path, ticket_cache = "","" # depended user or machine account
+    tmp = '/tmp'
 
     #client ca
     ca_path = '/usr/local/share/ca-certificates/DOMAIN-SERVER-CERTIFICATE.crt'  
@@ -36,23 +37,33 @@ def fetch_signedcer(username):
     if "$" not in username:# $ MEANS USER IS NOT MACHINE ACCOUNT
         uid = pwd.getpwnam(username).pw_uid
         gid = pwd.getpwnam(username).pw_gid
-        ticket_cache = f'/tmp/krb5cc_{uid}'#kerberos and home dir are mandatory
-        if not os.path.exists(ticket_cache) or uid < 1000:
-            return False
+        if uid >= 1000:
+            for krb_path in os.listdir(tmp):
+                if krb_path.startswith(f'krb5cc_{uid}'):
+                    ticket_cache = os.path.join(tmp, krb_path)
+            if ticket_cache == "":
+                print("Ticket file is not existing in /tmp")
+                return False
+
         os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
         permissions = 0o444
     
-        if not os.path.exists(sensitive_keys_path):
-            os.makedirs(sensitive_keys_path)
-
     else:#root computer acc
         uid = 0
         gid = 0
         sensitive_keys_path = f"/etc/ssl/.certificate_controller/"
         permissions = 0o600
-        if not os.path.exists(sensitive_keys_path):
-            os.makedirs(sensitive_keys_path)
+        for krb_path in os.listdir(tmp):
+            if krb_path.startswith(f'krb5cc_{uid}'):
+                ticket_cache = os.path.join(tmp, krb_path)
+        if ticket_cache == "":
+            subprocess.run(["kinit","-k","-t","/etc/krb5.keytab",username])
+            print(f"Ticket file is not existing in /tmp. Strived to create for {username}")
+    
+
+    if not os.path.exists(sensitive_keys_path):
+        os.makedirs(sensitive_keys_path)
 
     pem_file_path = f"{sensitive_keys_path}{username}.pem"
     if not os.path.exists(pem_file_path):

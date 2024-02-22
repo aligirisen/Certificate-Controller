@@ -12,6 +12,9 @@ import socket, django
 from source.service import run_period
 sys.path.append('/usr/bin/certificate_controller/ccapi')
 
+def ():
+
+
 def django_thread():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ccapi.settings')
@@ -27,8 +30,12 @@ def django_thread():
 def period_thread():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ccapi.settings')
     from ccapp.models import Username
-    usernames = [username.name for username in Username.objects.all()]
+    hostname = f"{(socket.gethostname()).upper()}$"
+    if not Username.objects.filter(name=hostname).exists():
+        user = Username(name=hostname)
+        user.save()
 
+    usernames = [username.name for username in Username.objects.all()]
     while True:
         run_period(usernames)
         time.sleep(duration)
