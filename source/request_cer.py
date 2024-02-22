@@ -33,7 +33,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     #parse domain from server
     server = server.upper()
     domain_parts = server.split('.')
-    domain = '.'.join(parts[-2:])
+    domain = '.'.join(domain_parts[-2:])
     kerberos_principal = f'{username}@{domain}'
 
     private_key_path = f'{sensitive_keys_path}private_key.pem'

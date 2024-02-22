@@ -15,4 +15,5 @@ def run_period(usernames):
         try:
             fetch_signedcer(str(username))
         except Exception as e:
+            print(e)
             continue

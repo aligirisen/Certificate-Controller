@@ -76,11 +76,11 @@ def fetch_signedcer(username):
             if entry['userCertificate']:
                 for i, cert_data in enumerate(entry['userCertificate']):
                     cert = load_der_x509_certificate(cert_data, default_backend())
-                    expiration_time = cert.not_valid_after
+                    expiration_time = cert.not_valid_after_utc
 
                     current_date = datetime.now()
                     current_date = current_date.replace(tzinfo=timezone.utc)
-                    days_remaining = (cert.not_valid_after - current_date).days
+                    days_remaining = (expiration_time - current_date).days
 
 
                     print("Checking...")
@@ -107,7 +107,7 @@ def fetch_signedcer(username):
             cert_data = f.read()
 
         cert = x509.load_pem_x509_certificate(cert_data, default_backend())
-        expiration_time = cert.not_valid_after
+        expiration_time = cert.not_valid_after_utc
         
         current_date = datetime.now()
         current_date = current_date.replace(tzinfo=timezone.utc)
