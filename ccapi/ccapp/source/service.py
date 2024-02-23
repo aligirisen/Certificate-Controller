@@ -14,4 +14,3 @@ def login(username):
         fetch_signedcer(username)
     except Exception as e:
         print(e)
-        continue

@@ -12,9 +12,6 @@ import socket, django
 from source.service import run_period
 sys.path.append('/usr/bin/certificate_controller/ccapi')
 
-def ():
-
-
 def django_thread():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ccapi.settings')
