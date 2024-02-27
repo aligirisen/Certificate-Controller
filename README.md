@@ -15,4 +15,4 @@ Now compile the deb package or install compiled one.
 
 
 
-kerberos is mandatory
+Server-site ssl bindings and kerberos are mandatory
