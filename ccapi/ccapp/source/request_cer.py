@@ -29,7 +29,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     certsrv_url = config.get('KRB','certsrv_url')
     
     server = config.get('AD', 'ad_server')
-    private_key_path, csr_path, csr_content = "","",""
+    csr_content,private_key,tmp = "","","/tmp"
 
     #parse domain from server
     server = server.upper()
@@ -44,11 +44,21 @@ def request_cer(username,sensitive_keys_path,uid,gid):
         with open(csr_path, "r") as csr_file:
             csr_content = csr_file.read()
     else:
-        private_key = generate_private_key_pem(private_key_path,uid,gid)
-        generate_csr(username, private_key, csr_path)
+        if os.path.exists(private_key_path):
+            csr_content = generate_csr(username, private_key, csr_path)
+        else:
+            private_key = generate_private_key_pem(private_key_path,uid,gid)
+            csr_content = generate_csr(username, private_key, csr_path)
 
+    for krb_path in os.listdir(tmp):
+        if krb_path.startswith(f'krb5cc_{uid}'):
+            ticket_cache = os.path.join(tmp, krb_path)
+    if ticket_cache == "":
+        print("Ticket file is not existing in /tmp")
+        return False
+    
+    os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
     # Kerberos authentication using keytab
-    os.environ['KRB5CCNAME'] = f'/tmp/krb5cc_{uid}'
     kerberos_auth = HTTPKerberosAuth(
             principal=kerberos_principal,
             sanitize_mutual_error_response=False,
@@ -67,9 +77,8 @@ def request_cer(username,sensitive_keys_path,uid,gid):
         verify=ca_cert_path,
         data=data
     )
-    print(response.status_code)
 
-    time.sleep(7)
+    time.sleep(4)
     os.remove(csr_path)
 
 def generate_private_key_pem(file_path,uid,gid):

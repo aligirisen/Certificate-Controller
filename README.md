@@ -15,4 +15,5 @@ Now compile the deb package or install compiled one.
 
 
 
-Server-site ssl bindings and kerberos are mandatory
+Server-site ssl bindings and kerberos are mandatory.
+Be aware of Server-site CA about security and permissions. There are not any permission to request certificate in fresh installed server.

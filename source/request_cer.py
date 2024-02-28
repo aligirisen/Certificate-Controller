@@ -28,7 +28,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     template_name = config.get('KRB','template_name')
     certsrv_url = config.get('KRB','certsrv_url')
     server = config.get('AD', 'ad_server')
-    private_key_path, csr_path, csr_content = "","",""
+    csr_content,private_key,tmp = "","","/tmp"
 
     #parse domain from server
     server = server.upper()
@@ -38,16 +38,16 @@ def request_cer(username,sensitive_keys_path,uid,gid):
 
     private_key_path = f'{sensitive_keys_path}private_key.pem'
     csr_path = f'{sensitive_keys_path}csr.csr'
-
     if os.path.exists(csr_path):
         with open(csr_path, "r") as csr_file:
             csr_content = csr_file.read()
     else:
-        private_key = generate_private_key_pem(private_key_path,uid,gid)
-        generate_csr(username, private_key, csr_path)
+        if os.path.exists(private_key_path):
+            csr_content = generate_csr(username, private_key, csr_path)
+        else:
+            private_key = generate_private_key_pem(private_key_path,uid,gid)
+            csr_content = generate_csr(username, private_key, csr_path)
 
-    # Kerberos authentication using keytab
-    os.environ['KRB5CCNAME'] = f'/tmp/krb5cc_{uid}'
     kerberos_auth = HTTPKerberosAuth(
             principal=kerberos_principal,
             sanitize_mutual_error_response=False,
@@ -66,8 +66,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
         verify=ca_cert_path,
         data=data
     )
-    print(response.status_code)
-    time.sleep(7)
+    time.sleep(4)
 
     os.remove(csr_path)
 

@@ -45,7 +45,6 @@ def fetch_signedcer(username):
                 print("Ticket file is not existing in /tmp")
                 return False
 
-        os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
         permissions = 0o444
     
@@ -58,9 +57,11 @@ def fetch_signedcer(username):
             if krb_path.startswith(f'krb5cc_{uid}'):
                 ticket_cache = os.path.join(tmp, krb_path)
         if ticket_cache == "":
+            ticket_cache = "/tmp/krb5cc_0"
             subprocess.run(["kinit","-k","-t","/etc/krb5.keytab",username])
             print(f"Ticket file is not existing in /tmp. Strived to create for {username}")
-    
+        
+    os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
 
     if not os.path.exists(sensitive_keys_path):
         os.makedirs(sensitive_keys_path)
@@ -84,9 +85,6 @@ def fetch_signedcer(username):
                     current_date = datetime.now()
                     current_date = current_date.replace(tzinfo=timezone.utc)
                     days_remaining = (expiration_time - current_date).days
-
-
-                    print("Checking...")
 
                     if days_remaining <= renew_before:
                         if os.path.exists(pem_file_path):

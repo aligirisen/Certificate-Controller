@@ -28,7 +28,7 @@ def fetch_signedcer(username):
     tmp = '/tmp'
 
     #client ca
-    ca_path = '/usr/local/share/ca-certificates/DOMAIN-SERVER-CERTIFICATE.crt'  
+    ca_path = '/usr/local/share/ca-certificates/DOMAIN-SERVER-CERTIFICATE.crt'
     installed_cert_path = '/etc/ssl/certs/DOMAIN-SERVER-CERTIFICATE.pem'
 
     if not os.path.exists(installed_cert_path):
@@ -45,7 +45,6 @@ def fetch_signedcer(username):
                 print("Ticket file is not existing in /tmp")
                 return False
 
-        os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
         permissions = 0o444
     else:#root computer acc
@@ -53,8 +52,15 @@ def fetch_signedcer(username):
         gid = 0
         sensitive_keys_path = f"/etc/ssl/.certificate_controller/"
         permissions = 0o600
+        for krb_path in os.listdir(tmp):
+            if krb_path.startswith(f'krb5cc_{uid}'):
+                ticket_cache = os.path.join(tmp, krb_path)
+        if ticket_cache == "":
+            ticket_cache = "/tmp/krb5cc_0"
+            subprocess.run(["kinit","-k","-t","/etc/krb5.keytab",username])
+            print(f"Ticket file is not existing in /tmp. Strived to create for {username}")
     
-
+    os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
     if not os.path.exists(sensitive_keys_path):
         os.makedirs(sensitive_keys_path)
     
