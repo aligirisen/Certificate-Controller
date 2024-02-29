@@ -12,12 +12,13 @@ from datetime import datetime, timezone
 from .request_cer import request_cer
 from .update_client_ca import update_client_ca
 
-def fetch_signedcer(username):
+def fetch_signedcer(username,recursive):
     config_path = "/etc/certificate_controller/config.ini"
-    if os.path.exists(config_path):
-        pass
-    else:
+    if not os.path.exists(config_path):
+        print("configurations has not launched")
         config_path = "config/config.ini"
+    if recursive => 2:
+        return False
 
     config = configparser.ConfigParser()
     config.read(config_path)
@@ -44,7 +45,6 @@ def fetch_signedcer(username):
             if ticket_cache == "":
                 print("Ticket file is not existing in /tmp")
                 return False
-
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
         permissions = 0o444
     else:#root computer acc
@@ -52,12 +52,12 @@ def fetch_signedcer(username):
         gid = 0
         sensitive_keys_path = f"/etc/ssl/.certificate_controller/"
         permissions = 0o600
+        subprocess.run(["kinit","-k","-t","/etc/krb5.keytab",username])
         for krb_path in os.listdir(tmp):
             if krb_path.startswith(f'krb5cc_{uid}'):
                 ticket_cache = os.path.join(tmp, krb_path)
         if ticket_cache == "":
             ticket_cache = "/tmp/krb5cc_0"
-            subprocess.run(["kinit","-k","-t","/etc/krb5.keytab",username])
             print(f"Ticket file is not existing in /tmp. Strived to create for {username}")
     
     os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
@@ -84,9 +84,6 @@ def fetch_signedcer(username):
                     current_date = current_date.replace(tzinfo=timezone.utc)
                     days_remaining = (expiration_time - current_date).days
 
-
-                    print("Checking...")
-
                     if days_remaining <= renew_before:
                         if os.path.exists(pem_file_path):
                             os.remove(pem_file_path)
@@ -102,7 +99,7 @@ def fetch_signedcer(username):
                     break
             else:
                 request_cer(username,sensitive_keys_path,uid,gid)
-                fetch_signedcer(username)
+                fetch_signedcer(username,recursive+1)
         connection.unbind()
     else:
         with open (pem_file_path, 'rb') as f:
@@ -116,4 +113,4 @@ def fetch_signedcer(username):
         days_remaining = (expiration_time - current_date).days
         if days_remaining <= renew_before:
             request_cer(username,sensitive_keys_path,uid,gid)
-
+            fetch_signedcer(username,recursive+1)

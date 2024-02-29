@@ -13,6 +13,6 @@ import psutil, socket
 def run_period(usernames):
     for username in usernames:
         try:
-            fetch_signedcer(str(username))
+            fetch_signedcer(str(username),0)
         except Exception as e:
             print(e)

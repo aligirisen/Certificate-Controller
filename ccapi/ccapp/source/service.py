@@ -11,6 +11,6 @@ import psutil, socket
 
 def login(username):
     try:
-        fetch_signedcer(username)
+        fetch_signedcer(str(username),0)
     except Exception as e:
         print(e)

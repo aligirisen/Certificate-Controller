@@ -26,10 +26,9 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     config.read(config_path)
     ca_cert_path = config.get('KRB','ca_cert_path')
     template_name = config.get('KRB','template_name')
-    certsrv_url = config.get('KRB','certsrv_url')
-    
+    certsrv_url = config.get('KRB','certsrv_url') 
     server = config.get('AD', 'ad_server')
-    csr_content,private_key,tmp = "","","/tmp"
+    csr_content,private_key = "",""
 
     #parse domain from server
     server = server.upper()
@@ -38,26 +37,20 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     kerberos_principal = f'{username}@{domain}'
 
     private_key_path = f'{sensitive_keys_path}private_key.pem'
-    csr_path = f'{sensitive_keys_path}csr.csr'
 
-    if os.path.exists(csr_path):
-        with open(csr_path, "r") as csr_file:
-            csr_content = csr_file.read()
+    if os.path.exists(private_key_path):
+        with open (private_key_path, "r") as key_file:
+            private_key = key_file.read()
+            rsa_key = serialization.load_pem_private_key(
+                    private_key.encode()
+                    password=None,
+                    backend=default_backend()
+                    )
+        csr_content = generate_csr(username, rsa_key)
     else:
-        if os.path.exists(private_key_path):
-            csr_content = generate_csr(username, private_key, csr_path)
-        else:
-            private_key = generate_private_key_pem(private_key_path,uid,gid)
-            csr_content = generate_csr(username, private_key, csr_path)
+        private_key = generate_private_key_pem(private_key_path,uid,gid)
+        csr_content = generate_csr(username, private_key)
 
-    for krb_path in os.listdir(tmp):
-        if krb_path.startswith(f'krb5cc_{uid}'):
-            ticket_cache = os.path.join(tmp, krb_path)
-    if ticket_cache == "":
-        print("Ticket file is not existing in /tmp")
-        return False
-    
-    os.environ['KRB5CCNAME'] = f'FILE:{ticket_cache}'
     # Kerberos authentication using keytab
     kerberos_auth = HTTPKerberosAuth(
             principal=kerberos_principal,
@@ -77,9 +70,6 @@ def request_cer(username,sensitive_keys_path,uid,gid):
         verify=ca_cert_path,
         data=data
     )
-
-    time.sleep(4)
-    os.remove(csr_path)
 
 def generate_private_key_pem(file_path,uid,gid):
     private_key = rsa.generate_private_key(
@@ -104,7 +94,7 @@ def generate_private_key_pem(file_path,uid,gid):
     print(f"Private key written to: {file_path}")
     return private_key
 
-def generate_csr(username, private_key, file_path):
+def generate_csr(username, private_key):
     csr = x509.CertificateSigningRequestBuilder().subject_name(
         x509.Name([
             x509.NameAttribute(NameOID.COUNTRY_NAME, "TR"),
@@ -118,8 +108,4 @@ def generate_csr(username, private_key, file_path):
 
     csr_pem = csr.public_bytes(serialization.Encoding.PEM)
 
-    with open(file_path, 'wb') as csr_file:
-        csr_file.write(csr_pem)
-
-    print(f"CSR written to: {file_path}")
-    return csr
+    return csr_pem
