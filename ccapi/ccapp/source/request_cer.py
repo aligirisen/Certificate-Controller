@@ -42,7 +42,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
         with open (private_key_path, "r") as key_file:
             private_key = key_file.read()
             rsa_key = serialization.load_pem_private_key(
-                    private_key.encode()
+                    private_key.encode(),
                     password=None,
                     backend=default_backend()
                     )

@@ -17,7 +17,7 @@ def fetch_signedcer(username,recursive):
     if not os.path.exists(config_path):
         print("configurations has not launched")
         config_path = "config/config.ini"
-    if recursive => 2:
+    if recursive >= 2:
         return False
 
     config = configparser.ConfigParser()
