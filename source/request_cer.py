@@ -14,6 +14,10 @@ from cryptography import x509
 import base64
 from cryptography.x509.oid import NameOID
 
+from logger_utils import get_logger
+logger = get_logger(__name__)
+
+
 def request_cer(username,sensitive_keys_path,uid,gid):
     config_path = "/etc/certificate_controller/config.ini"
     if os.path.exists(config_path):
@@ -21,6 +25,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     else:
         print("Certificate-Controller is not installed")
         config_path = "config/config.ini"
+        logger.error("Configurations has not found at /etc/certificate_controller/config.ini")
     #variables
     config = configparser.ConfigParser()
     config.read(config_path)
@@ -46,6 +51,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
                     backend=default_backend()
                     )
         csr_content = generate_csr(username, rsa_key)
+        logger.info("Private key found. CSR is creating...")
     else:
         private_key = generate_private_key_pem(private_key_path,uid,gid)
         csr_content = generate_csr(username, private_key)
@@ -70,6 +76,7 @@ def request_cer(username,sensitive_keys_path,uid,gid):
     )
 
 def generate_private_key_pem(file_path,uid,gid):
+    logger.info("Generating private key...")
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
@@ -93,6 +100,7 @@ def generate_private_key_pem(file_path,uid,gid):
     return private_key
 
 def generate_csr(username, private_key):
+    logger.info("Generating CSR...")
     csr = x509.CertificateSigningRequestBuilder().subject_name(
         x509.Name([
             x509.NameAttribute(NameOID.COUNTRY_NAME, "TR"),
@@ -106,5 +114,5 @@ def generate_csr(username, private_key):
 
     csr_pem = csr.public_bytes(serialization.Encoding.PEM)
 
-    print(f"CSR created")
+    print(f"CSR generated")
     return csr_pem

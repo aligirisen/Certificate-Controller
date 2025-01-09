@@ -1,0 +1,15 @@
+#!/bin/bash
+case "$1" in
+    remove)
+        # Remove configuration files
+        rm -rf /etc/certificate_controller/
+
+        # Remove logs
+        rm -f /var/log/certificate-controller.log
+
+        # Remove binaries or additional directories
+        rm -rf /usr/bin/certificate_controller/
+        ;;
+esac
+exit 0
+

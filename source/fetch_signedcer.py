@@ -9,14 +9,20 @@ from cryptography.x509 import load_der_x509_certificate
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from datetime import datetime, timezone
+
+from logger_utils import get_logger
 from .request_cer import request_cer
 from .update_client_ca import update_client_ca
+
+logger = get_logger(__name__)
+
 
 def fetch_signedcer(username,recursive):
     config_path = "/etc/certificate_controller/config.ini"
     if not os.path.exists(config_path):
         print("configurations has not launched")
         config_path = "config/config.ini"
+        logger.error("Configurations has not found at /etc/certificate_controller/config.ini")
     if recursive >= 2:
         return False
 
@@ -44,6 +50,7 @@ def fetch_signedcer(username,recursive):
                     ticket_cache = os.path.join(tmp, krb_path)
             if ticket_cache == "":
                 print("Ticket file is not existing in /tmp")
+                logger.warning("Ticket(USER) file is not existing in /tmp. Creating...")
                 return False
 
         sensitive_keys_path = f"/home/{username}/.certificate_controller/"
@@ -60,6 +67,7 @@ def fetch_signedcer(username,recursive):
                 ticket_cache = os.path.join(tmp, krb_path)
         if ticket_cache == "":
             print("ticket was not created")
+            logger.warning("Ticket(USER) file is not existing in /tmp. Creating...")
             ticket_cache = "/tmp/krb5cc_0"
 
         
@@ -100,6 +108,8 @@ def fetch_signedcer(username,recursive):
                             os.chmod(pem_file_path, permissions)
                             print(f"Certificate Expiration Time: {expiration_time}")
                             print(f"Certificate saved as PEM: {pem_file_path}")
+                            logger.info(f"Certificate Expiration Time: {expiration_time}")
+                            logger.info(f"Certificate saved as PEM: {pem_file_path}")
                     break
             else:
                 request_cer(username,sensitive_keys_path,uid,gid)
@@ -115,7 +125,10 @@ def fetch_signedcer(username,recursive):
         current_date = datetime.now()
         current_date = current_date.replace(tzinfo=timezone.utc)
         days_remaining = (expiration_time - current_date).days
+
+        logger.info("Certificate is existing")
         if days_remaining <= renew_before:
+            logger.info(f"Remaining days: {days_remaining}. Certificate is renewing...")
             request_cer(username,sensitive_keys_path,uid,gid)
             fetch_signedcer(username,recursive+1)
 
