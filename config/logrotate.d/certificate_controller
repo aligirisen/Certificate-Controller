@@ -1,0 +1,9 @@
+/var/log/certificate-controller.log {
+    weekly              # Rotate logs weekly
+    rotate 2            # Keep 2 weeks of logs
+    compress            # Compress old logs
+    missingok           # Don't throw an error if the log file is missing
+    notifempty          # Don't rotate the log if it's empty
+    create 0640 root root
+}
+

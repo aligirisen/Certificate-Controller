@@ -5,10 +5,14 @@ case "$1" in
         rm -rf /etc/certificate_controller/
 
         # Remove logs
-        rm -f /var/log/certificate-controller.log
+        rm -rf /var/log/certificate_controller/
+
+	rm -rf /etc/logrotate.d/certificate_controller/
 
         # Remove binaries or additional directories
         rm -rf /usr/bin/certificate_controller/
+
+        rm -rf /opt/certificate_controller_env/
         ;;
 esac
 exit 0

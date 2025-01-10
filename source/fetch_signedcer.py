@@ -10,7 +10,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from datetime import datetime, timezone
 
-from logger_utils import get_logger
+from .logger_utils import get_logger
 from .request_cer import request_cer
 from .update_client_ca import update_client_ca
 

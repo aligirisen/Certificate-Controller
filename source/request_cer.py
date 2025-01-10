@@ -14,7 +14,7 @@ from cryptography import x509
 import base64
 from cryptography.x509.oid import NameOID
 
-from logger_utils import get_logger
+from .logger_utils import get_logger
 logger = get_logger(__name__)
 
 
