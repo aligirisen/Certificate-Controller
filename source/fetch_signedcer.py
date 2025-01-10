@@ -28,6 +28,9 @@ def fetch_signedcer(username,recursive):
 
     config = configparser.ConfigParser()
     config.read(config_path)
+    if 'server.domain.com' in str(config):
+        logger.error("Config file has not been changed (/etc/certificate_controller/config.ini)")
+        fetch_signedcer(username,recursive)
     ad_server = config.get('AD','ad_server')
     base_dn = config.get('AD','base_dn')
     renew_before = int(config.get('TIME','renew_before'))

@@ -1,5 +1,5 @@
 config/config.ini /etc/certificate_controller/
-config/logrotate.d/ /etc/logrotate.d/certificate_controller
+config/logrotate.d/ /etc/logrotate.d/
 certificate_controller.service /etc/systemd/system/
 requirements.txt /usr/share/certificate_controller/
 ccapi/* /usr/bin/certificate_controller/ccapi/
