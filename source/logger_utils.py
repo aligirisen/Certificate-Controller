@@ -1,7 +1,12 @@
-import logging
+import logging, os
 
 # Configure the logging system
-LOG_FILE_PATH = '/var/log/certificate_controller/certificate-controller.log'
+LOG_FILE_PATH = '/var/log/certificate_controller/certificate_controller.log'
+
+log_dir = os.path.dirname(LOG_FILE_PATH)
+
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 
 logging.basicConfig(
     filename=LOG_FILE_PATH,  # Shared log file path

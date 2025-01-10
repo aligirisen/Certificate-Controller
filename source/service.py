@@ -9,6 +9,8 @@ from django.dispatch import receiver
 from .fetch_signedcer import fetch_signedcer
 import psutil, socket
 
+from .logger_utils import get_logger
+logger = get_logger(__name__)
 
 def run_period(usernames):
     for username in usernames:
@@ -16,3 +18,4 @@ def run_period(usernames):
             fetch_signedcer(str(username),0)
         except Exception as e:
             print(e)
+            logger.error(e)
